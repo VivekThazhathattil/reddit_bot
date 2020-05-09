@@ -62,10 +62,15 @@ class reddit_bot(object):
 #        self.reddit = praw.Reddit("cuck_simulator",
 #                user_agent = "a really really toxic bot")
 ## Use this for Heroku
-        reddit_username = os.environ['reddit_username']
-        reddit_password = os.environ['reddit_password']
-        client_id = os.environ['client_id']
-        client_secret = os.environ['client_secret']
+        reddit_username_v = os.environ['reddit_username']
+        reddit_password_v = os.environ['reddit_password']
+        client_id_v = os.environ['client_id']
+        client_secret_v = os.environ['client_secret']
+        self.reddit = praw.Reddit(client_id=client_id_v,
+                     client_secret=client_secret_v,
+                     password=reddit_password_v,
+                     user_agent="a really really toxic bot",
+                     username=reddit_username_v)
         print("authenticated the bot")
 
     def delete_downvoted_comments(self) -> None:
