@@ -36,7 +36,6 @@ class reddit_bot(object):
         """
         source: https://www.learndatasci.com/tutorials/sentiment-analysis-reddit-headlines-pythons-nltk/
         """
-        print(str(self.com_body))
         pol_score = self.sia.polarity_scores(str(self.com_body))
         # Take margin of -0.6 for negative sentiment cutoff
         if pol_score['compound'] < -0.6:
@@ -107,14 +106,14 @@ class reddit_bot(object):
 
     def run_bot(self) -> None:
 #        try:
-            self.comment_num = 25
+            self.comment_num = 100
             found_trigger_comment = self.check_trigger_comments()
             if found_trigger_comment:
                 self.insult_text = self.get_my_insult()
 #                self.insult_text = self.get_shakespearean_insult()
                 self.reply_to_trigger_comment()
                 self.mark_replied()
-        except Exception as e:
+#        except Exception as e:
 #            if e == praw.exceptions.APIException:
                 print("waiting for a minute")
                 time.sleep(60)
