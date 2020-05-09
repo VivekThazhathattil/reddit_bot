@@ -1,29 +1,51 @@
+# common imports
 import praw
 import random
 import requests
 import time
 import os
+from sh_ins import Shakespearean_insult
+
+# for ML
+# note-to-self: make sure to do `conda activate ml3`
+import math
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 class reddit_bot(object):
-    insult_list = [ "dumb", 
-            "shit", 
-            "asshole", 
-            "fuck", 
-            "bitch", 
-            "piss", 
-            "drunk", 
-            "bastard", 
-            "dick", 
-            "cunt", 
-            "FUCK", 
-            "Fuck", 
-            "poo", 
-            "stfu",
-            "Stfu",
-            "STFU",
-            "gtfo",
-            "GTFO",
-            "Gtfo" ]
+    def __init__(self):
+        self.insult_list = [ "dumb", 
+                "shit", 
+                "asshole", 
+                "fuck", 
+                "bitch", 
+                "piss", 
+                "drunk", 
+                "bastard", 
+                "dick", 
+                "cunt", 
+                "poo", 
+                "stfu",
+                "kys",
+                "gtfo" ]
+
+        self.shins = Shakespearean_insult()
+        self.sia = SentimentIntensityAnalyzer()
+
+    def get_sentiment_analysis_results(self) -> bool:
+        """
+        source: https://www.learndatasci.com/tutorials/sentiment-analysis-reddit-headlines-pythons-nltk/
+        """
+        print(str(self.com_body))
+        pol_score = self.sia.polarity_scores(str(self.com_body))
+        # Take margin of -0.6 for negative sentiment cutoff
+        if pol_score['compound'] < -0.6:
+            print("malicious comment detected:")
+            print("Compound : " + str(pol_score['compound']))
+            print(str(self.com_body))
+            return True
+        return False
+
 
     def get_num_lines_in_file(self) -> int:
         print("get number of lines in filtered_insults.txt")
@@ -59,12 +81,14 @@ class reddit_bot(object):
         print(f"Obtaining {self.comment_num} comments ...")
         self.get_list_of_already_replied()
         for comment in self.reddit.subreddit('all').comments(limit=self.comment_num):
-            com_body = comment.body
-            if any(word in com_body for word in self.insult_list) \
+            self.com_body = comment.body.lower()
+            if any(word in self.com_body for word in self.insult_list) \
             and comment.id not in self.already_replied \
+            and len(self.com_body.split()) < 8 \
             and comment.author != self.reddit.user.me():
-                self.target_comment = comment
-                return True
+                if self.get_sentiment_analysis_results():
+                    self.target_comment = comment
+                    return True
         return False
 
     def reply_to_trigger_comment(self) -> None:
@@ -82,11 +106,12 @@ class reddit_bot(object):
             f.write(self.target_comment.id + "\n")
 
     def run_bot(self) -> None:
-        try:
+#        try:
             self.comment_num = 25
             found_trigger_comment = self.check_trigger_comments()
             if found_trigger_comment:
                 self.insult_text = self.get_my_insult()
+#                self.insult_text = self.get_shakespearean_insult()
                 self.reply_to_trigger_comment()
                 self.mark_replied()
         except Exception as e:
@@ -105,3 +130,5 @@ class reddit_bot(object):
                     print("waiting for a minute")
                     time.sleep(60)
                     pass
+    def get_shakespearean_insult(self) -> str:
+       return self.shins.get_insult()
