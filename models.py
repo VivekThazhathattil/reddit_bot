@@ -47,8 +47,8 @@ class reddit_bot(object):
 
 
     def get_num_lines_in_file(self) -> int:
-        print("get number of lines in filtered_insults.txt")
-        return sum(1 for line in open('filtered_insults.txt'))
+        print("get number of lines in dataset.txt")
+        return sum(1 for line in open('dataset.txt'))
 
     def get_nth_line_in_file(self) -> str:
         print("get nth line from filtered_insults.txt")
